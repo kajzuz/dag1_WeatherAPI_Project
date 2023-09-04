@@ -1,0 +1,66 @@
+[ {
+  "id" : "1e52d48c-32ff-4a7b-80ca-ef3c02f46632",
+  "date" : "2023-08-30",
+  "hour" : 21,
+  "temperature" : 24.0
+}, {
+  "id" : "45217246-e0a9-41b5-892a-03184ab39b57",
+  "date" : "2023-08-29",
+  "hour" : 12,
+  "temperature" : 12.0
+}, {
+  "id" : "820d066f-5f94-4b23-ad7a-0154957973e2",
+  "date" : "2023-08-29",
+  "hour" : 12,
+  "temperature" : 26.0
+}, {
+  "id" : "30679983-91b3-4012-83a6-f55e7a348936",
+  "date" : "2023-08-31",
+  "hour" : 21,
+  "temperature" : 15.0
+}, {
+  "id" : "af51a8f6-8beb-4a63-9727-a9ff1a3d6232",
+  "date" : "2023-08-29",
+  "hour" : 20,
+  "temperature" : 27.0
+}, {
+  "id" : "b135ffa2-fc7b-4081-bf19-906a74907752",
+  "date" : "2023-08-29",
+  "hour" : 13,
+  "temperature" : 24.0
+}, {
+  "id" : "a41e1727-291f-4e07-afd9-4c78bed16181",
+  "date" : "2023-09-01",
+  "hour" : 8,
+  "temperature" : 14.0
+}, {
+  "id" : "a4af0fbb-00de-4dab-b04e-06683ee02b5b",
+  "date" : "2023-09-01",
+  "hour" : 17,
+  "temperature" : 25.0
+}, {
+  "id" : "5b287f25-718c-482a-834b-502cdc74effa",
+  "date" : "2023-09-02",
+  "hour" : 10,
+  "temperature" : 24.0
+}, {
+  "id" : "3ecabb66-5503-48d6-a560-6bfab4f3b6e0",
+  "date" : "2023-08-31",
+  "hour" : 12,
+  "temperature" : 21.0
+}, {
+  "id" : "d1e68b52-563d-4e1c-a6e4-ea49b5caef48",
+  "date" : "2023-09-04",
+  "hour" : 10,
+  "temperature" : 25.0
+}, {
+  "id" : "fa7ea3a5-99d5-4d91-a37d-2030b8ce41cd",
+  "date" : "2023-09-04",
+  "hour" : 10,
+  "temperature" : 25.0
+}, {
+  "id" : "4a783cd7-e6d6-4cdc-8f79-d654d8d1441e",
+  "date" : "2023-08-09",
+  "hour" : 12,
+  "temperature" : 14.0
+} ]
