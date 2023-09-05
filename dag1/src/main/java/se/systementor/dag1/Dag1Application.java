@@ -159,7 +159,7 @@ public class Dag1Application implements CommandLineRunner { // G: get average on
 	}
 
 
-	private void addPrediction(Scanner scanner) throws ParseException {
+	private void addPrediction(Scanner scanner) {
 
 
 		System.out.println("<-- Create Prediction -->");
@@ -170,12 +170,6 @@ public class Dag1Application implements CommandLineRunner { // G: get average on
 		DateTimeFormatter date = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 		LocalDate dateFormatted = LocalDate.parse(day, date);
 
-		//SimpleDateFormat date = new SimpleDateFormat("yyyy-MM-dd");
-		//LocalDateTime dateFormatted = LocalDateTime.parse(day,date);
-		//LocalDateTime dateFormatted = LocalDateTime.parse(String.valueOf(date2));
-
-		//Instant instant = dateFormatted.toInstant();
-		//LocalDateTime dateActually = instant.atZone(ZoneId.from(Instant.now())).toLocalDateTime();
 
 		System.out.println("Hour: ");
 		int hour = scanner.nextInt();
@@ -235,7 +229,7 @@ public class Dag1Application implements CommandLineRunner { // G: get average on
 	}
 
 
-	private void SMHIApiData() { //save to sql light somehow
+	private void SMHIApiData() {
 
 
 		ObjectMapper objectMapper = new ObjectMapper();
@@ -252,6 +246,10 @@ public class Dag1Application implements CommandLineRunner { // G: get average on
 		}
 
 
+		var scanner = new Scanner(System.in);
+		System.out.println("Enter date (yyyy-MM-dd): ");
+		String userInput = scanner.next();
+
 
 		System.out.println("----------------------------------------------------");
 
@@ -263,69 +261,73 @@ public class Dag1Application implements CommandLineRunner { // G: get average on
 		System.out.println("----------------------------------------------------");
 
 
+		for (TimeSeries timeSeries : weatherSMHI.getTimeSeries()) { // Limit results to a day
+			//String validTime = String.valueOf(timeSeries.getValidTime());
+
+			LocalDate dateFormatted = convertToLocalDateViaInstant(timeSeries.getValidTime());
 
 
+			Date validTime = timeSeries.getValidTime();
+
+			calendar.setTime(validTime);
+
+			int hour = calendar.get(Calendar.HOUR_OF_DAY);
 
 
-			for (TimeSeries timeSeries : weatherSMHI.getTimeSeries()) { // Limit results to a day
-				//String validTime = String.valueOf(timeSeries.getValidTime());
-
-				LocalDate dateFormatted = convertToLocalDateViaInstant(timeSeries.getValidTime());
-
-				Date validTime = timeSeries.getValidTime();
-
-				calendar.setTime(validTime);
+			LocalDate inputDate = LocalDate.parse(userInput);
 
 
-				int hour = calendar.get(Calendar.HOUR_OF_DAY);
+			if (dateFormatted.equals(inputDate)) {
+				for (Parameter parameter : timeSeries.getParameters()) {
 
 
-
-					for (Parameter parameter : timeSeries.getParameters()) {
-
-						List<Float> temperature = parameter.getValues();
-
-						for (float temp : temperature){
+					List<Float> temperature = parameter.getValues();
 
 
-						if (parameter.getName().equals("t")) {
+					for (float temp : temperature) {
 
-							System.out.println("----------------------------------------------------");
-							System.out.println("Date: " + dateFormatted + ", hour: " + hour);
-							System.out.println("Name: " + parameter.getName());
-							System.out.println("Level type: " + parameter.getLevelType());
-							System.out.println("Level: " + parameter.getLevel());
-							System.out.println("Unit: " + parameter.getUnit());
-							System.out.println("Values (Temperature): " + temperature); //parameter.getValues() and temperature same
-							System.out.println("----------------------------------------------------");
-
-							Forecast forecast = new Forecast();
-							forecast.setDate(dateFormatted.atStartOfDay());
-							forecast.setTemperature(temp);
-							forecast.setHour(hour);
-
-							forecast.setDataSource(DataSource.Smhi);
-							forecastRepository.save(forecast);
+						if (!parameter.getUnit().equals("category")) {
 
 
-						} else if (parameter.getName().equals("pcat")) {
+							if (parameter.getName().equals("t")) {
 
-							System.out.println("----------------------------------------------------");
-							System.out.println("Date: " + dateFormatted);
-							System.out.println("Name: " + parameter.getName());
-							System.out.println("Level type: " + parameter.getLevelType());
-							System.out.println("Level: " + parameter.getLevel());
-							System.out.println("Unit: " + parameter.getUnit());
-							System.out.println("Values (Temperature): " + temperature); //parameter.getValues() and temperature same
-							System.out.println("----------------------------------------------------");
+								System.out.println("----------------------------------------------------");
+								System.out.println("Date: " + dateFormatted + ", hour: " + hour + ":00");
+								System.out.println("Name: " + parameter.getName());
+								System.out.println("Level type: " + parameter.getLevelType());
+								System.out.println("Level: " + parameter.getLevel());
+								System.out.println("Unit: " + parameter.getUnit());
+								System.out.println("Values (Temperature): " + temperature); //parameter.getValues() and temperature same
+								System.out.println("----------------------------------------------------");
 
-						}
+								Forecast forecast = new Forecast();
+								forecast.setDate(dateFormatted.atStartOfDay());
+								forecast.setTemperature(temp);
+								forecast.setHour(hour);
+
+								forecast.setDataSource(DataSource.Smhi);
+								forecastRepository.save(forecast);
+
+
+							} else if (parameter.getName().equals("pcat")) {
+
+								System.out.println("----------------------------------------------------");
+								System.out.println("Date: " + dateFormatted);
+								System.out.println("Name: " + parameter.getName());
+								System.out.println("Level type: " + parameter.getLevelType());
+								System.out.println("Level: " + parameter.getLevel());
+								System.out.println("Unit: " + parameter.getUnit());
+								System.out.println("Values (Temperature): " + temperature); //parameter.getValues() and temperature same
+								System.out.println("----------------------------------------------------");
+
+							}
 
 						}
 					}
 				}
 			}
-		//}
+		}
+	}
 
 
 
@@ -526,14 +528,6 @@ public class Dag1Application implements CommandLineRunner { // G: get average on
 
 
 	public void averageSmhiAndJsonTemperatures() {
-
-		/*var forecast = new Forecast();
-		forecast.setId(UUID.randomUUID());
-		forecast.setTemperature(12);
-		forecast.setPredictionDate(LocalDateTime.now());
-		forecast.setHour(10);*/
-
-
 
 
 		Scanner scanner = new Scanner(System.in);

@@ -22,13 +22,6 @@ public class ForecastController {
     @Autowired
     ForecastService forecastService;
 
-    /*
-    ResponseEntity represents the whole HTTP response: status code, headers, and body*/
-    /*@GetMapping("/api/forecasts")
-    public ResponseEntity<List<Forecast>> getAll(){
-        return new ResponseEntity<>(forecastService.getForecastList(), HttpStatus.OK);
-    }*/
-
 
     @GetMapping("/api/forecasts")
     public ResponseEntity<List<ForecastListDTO>>getAll(){
@@ -50,11 +43,6 @@ public class ForecastController {
         return  ResponseEntity.notFound().build(); // Same as HTTPStatus.OK, just another way
     }
 
-    /*@PutMapping("/api/forecasts/{id}")
-    public ResponseEntity<Forecast> update(@PathVariable UUID id, @RequestBody Forecast forecast){ //@Requestbody to convert incoming data to java object
-        forecastService.update(forecast);
-        return ResponseEntity.ok(forecast);
-    }*/
 
     @PutMapping("/api/forecasts/{id}")
     public ResponseEntity<Forecast> update(@PathVariable UUID id, @RequestBody NewForecastDTO newForecastDto){ //@Requestbody to convert incoming data to java object
