@@ -13,7 +13,7 @@ public class Parameter {
     private String levelType;
     private String unit;
     private int level;
-    private ArrayList<Double> values;
+    private ArrayList<Float> values;
 
     public String getName() {
         return name;
@@ -47,11 +47,11 @@ public class Parameter {
         this.level = level;
     }
 
-    public ArrayList<Double> getValues() {
+    public ArrayList<Float> getValues() {
         return values;
     }
 
-    public void setValues(ArrayList<Double> values) {
+    public void setValues(ArrayList<Float> values) {
         this.values = values;
     }
 

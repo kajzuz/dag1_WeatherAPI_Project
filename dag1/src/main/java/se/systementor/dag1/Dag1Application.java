@@ -31,6 +31,8 @@ public class Dag1Application implements CommandLineRunner { // G: get average on
 
 	@Autowired // "newar" for us when compiled
 	private ForecastService forecastService;
+
+	@Autowired
 	private ForecastRepository forecastRepository;
 
 
@@ -215,7 +217,7 @@ public class Dag1Application implements CommandLineRunner { // G: get average on
 		int newTemp = scanner.nextInt();
 
 
-		forecast.setTemperature(newTemp);
+		forecast.setTemperature((float) newTemp);
 
 		System.out.println("New temp added!");
 
@@ -236,8 +238,9 @@ public class Dag1Application implements CommandLineRunner { // G: get average on
 	private void SMHIApiData() { //save to sql light somehow
 
 
-
 		ObjectMapper objectMapper = new ObjectMapper();
+
+		Calendar calendar = Calendar.getInstance();
 
 
 		String SMHIUrl = "https://opendata-download-metfcst.smhi.se/api/category/pmp3g/version/2/geotype/point/lon/16.158/lat/58.5812/data.json";
@@ -247,6 +250,7 @@ public class Dag1Application implements CommandLineRunner { // G: get average on
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
+
 
 
 		System.out.println("----------------------------------------------------");
@@ -260,34 +264,72 @@ public class Dag1Application implements CommandLineRunner { // G: get average on
 
 
 
-		for (TimeSeries timeSeries : weatherSMHI.getTimeSeries()) { // Limit results to a day every hour
-			//String validTime = String.valueOf(timeSeries.getValidTime());
-
-			LocalDate dateFormatted = convertToLocalDateViaInstant(timeSeries.getValidTime());
-
-			for (Parameter parameter : timeSeries.getParameters()) {
-
-				List<Double> temperature = parameter.getValues();
 
 
-				if (parameter.getName().equals("t") || parameter.getName().equals("pcat")) {
+
+			for (TimeSeries timeSeries : weatherSMHI.getTimeSeries()) { // Limit results to a day
+				//String validTime = String.valueOf(timeSeries.getValidTime());
+
+				LocalDate dateFormatted = convertToLocalDateViaInstant(timeSeries.getValidTime());
+
+				Date validTime = timeSeries.getValidTime();
+
+				calendar.setTime(validTime);
 
 
-					System.out.println("----------------------------------------------------");
-					System.out.println("Date " + dateFormatted);
-					System.out.println("Name: " + parameter.getName());
-					System.out.println("Level type: " + parameter.getLevelType());
-					System.out.println("Level: " + parameter.getLevel());
-					System.out.println("Unit: " + parameter.getUnit());
-					System.out.println("Values (Temperature): " + temperature); //parameter.getValues() and temperature same
-					System.out.println("----------------------------------------------------");
+				int hour = calendar.get(Calendar.HOUR_OF_DAY);
 
 
+
+					for (Parameter parameter : timeSeries.getParameters()) {
+
+						List<Float> temperature = parameter.getValues();
+
+						for (float temp : temperature){
+
+
+						if (parameter.getName().equals("t")) {
+
+							System.out.println("----------------------------------------------------");
+							System.out.println("Date: " + dateFormatted + ", hour: " + hour);
+							System.out.println("Name: " + parameter.getName());
+							System.out.println("Level type: " + parameter.getLevelType());
+							System.out.println("Level: " + parameter.getLevel());
+							System.out.println("Unit: " + parameter.getUnit());
+							System.out.println("Values (Temperature): " + temperature); //parameter.getValues() and temperature same
+							System.out.println("----------------------------------------------------");
+
+							Forecast forecast = new Forecast();
+							forecast.setDate(dateFormatted.atStartOfDay());
+							forecast.setTemperature(temp);
+							forecast.setHour(hour);
+
+							forecast.setDataSource(DataSource.Smhi);
+							forecastRepository.save(forecast);
+
+
+						} else if (parameter.getName().equals("pcat")) {
+
+							System.out.println("----------------------------------------------------");
+							System.out.println("Date: " + dateFormatted);
+							System.out.println("Name: " + parameter.getName());
+							System.out.println("Level type: " + parameter.getLevelType());
+							System.out.println("Level: " + parameter.getLevel());
+							System.out.println("Unit: " + parameter.getUnit());
+							System.out.println("Values (Temperature): " + temperature); //parameter.getValues() and temperature same
+							System.out.println("----------------------------------------------------");
+
+						}
+
+						}
+					}
 				}
 			}
-		}
+		//}
 
-	}
+
+
+
 
 	public LocalDate convertToLocalDateViaInstant(Date dateToConvert) {
 		return dateToConvert.toInstant()
@@ -306,6 +348,12 @@ public class Dag1Application implements CommandLineRunner { // G: get average on
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
+
+
+		var scanner = new Scanner(System.in);
+		System.out.println("Enter date (yyyy-MM-dd): ");
+		String userInput = scanner.next();
+
 
 		System.out.println("----------------------------------------------------");
 
@@ -332,29 +380,37 @@ public class Dag1Application implements CommandLineRunner { // G: get average on
 		HourlyOpenMeteo hourlyOpenMeteo = weatherOpenMeteo.getHourly();
 
 
+		LocalDate inputDate = LocalDate.parse(userInput);
+
+
 		List<Double> temperature = hourlyOpenMeteo.getTemperature_2m();
 		List<Integer> relativehumidity_2m = hourlyOpenMeteo.getRelativehumidity_2m();
 		List<Double> windSpeed_10m = hourlyOpenMeteo.getWindspeed_10m();
 		List<String> time = hourlyOpenMeteo.getTime();
 
 
-		for (int i = 0; i < time.size(); i++) { 
+		for (int i = 0; i < time.size(); i++) {
 
 			String originalFormattedTime = time.get(i);
 
-			LocalDate localDate = LocalDate.parse(originalFormattedTime, DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm"));
+			/*LocalDate localDate = LocalDate.parse(originalFormattedTime, DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm"));
 
-			String dataFormatted = localDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+			String dataFormatted = localDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));*/
 
+			LocalDateTime dateTime = LocalDateTime.parse(originalFormattedTime, DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm"));
 
-			System.out.println("----------------------------------------------------");
-			System.out.println("Date: " + dataFormatted);
-			System.out.println("Temperature: " + temperature.get(i));
-			System.out.println("Relativehumidity_2m: " + relativehumidity_2m.get(i));
-			System.out.println("Windspeed_10m: " + windSpeed_10m.get(i));
-			System.out.println("----------------------------------------------------");
+			LocalDate dataFormatted = dateTime.toLocalDate();
+			int hour = dateTime.getHour();
 
+			if (dataFormatted.equals(inputDate)) {
+				System.out.println("----------------------------------------------------");
+				System.out.println("Date: " + dataFormatted + ", hour: " + hour + ":00");
+				System.out.println("Temperature: " + temperature.get(i));
+				System.out.println("Relativehumidity_2m: " + relativehumidity_2m.get(i));
+				System.out.println("Windspeed_10m: " + windSpeed_10m.get(i));
+				System.out.println("----------------------------------------------------");
 
+			}
 		}
 
 
@@ -410,11 +466,11 @@ public class Dag1Application implements CommandLineRunner { // G: get average on
 
 			for (Parameter parameter : amount) {
 
-				List<Double> temperature = parameter.getValues();
+				List<Float> temperature = parameter.getValues();
 
 
 
-				for (Double temp : temperature) {
+				for (Float temp : temperature) {
 					totalSum += temp;
 					amountOfNumbers++;
 				}
@@ -506,13 +562,13 @@ public class Dag1Application implements CommandLineRunner { // G: get average on
 
 			if (dateFormatted.equals(inputDate)) {
 				for (Parameter parameter : timeSeries.getParameters()) {
-					List<Double> temperature = parameter.getValues();
+					List<Float> temperature = parameter.getValues();
 
 					if (parameter.getName().equals("t") || parameter.getName().equals("pcat")) {
 						double totalTemp = 0;
 						int count = 0;
 
-						for (Double temp : temperature) {
+						for (Float temp : temperature) {
 							totalTemp += temp;
 							count++;
 						}

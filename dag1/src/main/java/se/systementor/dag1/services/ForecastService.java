@@ -1,17 +1,11 @@
 package se.systementor.dag1.services;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import se.systementor.dag1.models.Forecast;
+
 import se.systementor.dag1.repositorys.ForecastRepository;
 
-import java.io.IOException;
-import java.io.StringWriter;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -30,6 +24,7 @@ public class ForecastService {
             throw new RuntimeException(e);
         }*/
     }
+
 
 
 

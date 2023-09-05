@@ -1,7 +1,6 @@
 package se.systementor.dag1.controllers;
 
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,8 +11,6 @@ import se.systementor.dag1.dto.NewForecastDTO;
 import se.systementor.dag1.models.*;
 import se.systementor.dag1.services.ForecastService;
 
-import java.io.IOException;
-import java.net.URL;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -88,8 +85,11 @@ public class ForecastController {
     }
 
 
+
+
+
     // Get average temperature SMHI Api
-    @GetMapping("/api/smhi/averageTempSMHI/{date}")
+   /* @GetMapping("/api/smhi/averageTempSMHI/{date}")
     public ResponseEntity<Double> getAverageTemperatureSmhiApi() {
 
         ObjectMapper objectMapper = new ObjectMapper();
@@ -202,7 +202,7 @@ public class ForecastController {
         if (!forecast.isEmpty()) {return ResponseEntity.ok(forecast);
         } else {return ResponseEntity.notFound().build();
         }
-    }
+    }*/
 
 
 }
