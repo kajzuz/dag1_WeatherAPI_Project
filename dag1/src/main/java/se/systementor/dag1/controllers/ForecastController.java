@@ -11,9 +11,10 @@ import se.systementor.dag1.dto.NewForecastDTO;
 import se.systementor.dag1.models.*;
 import se.systementor.dag1.services.ForecastService;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @RestController
@@ -24,8 +25,8 @@ public class ForecastController {
 
 
     @GetMapping("/api/forecasts")
-    public ResponseEntity<List<ForecastListDTO>>getAll(){
-        return new ResponseEntity<List<ForecastListDTO>>(forecastService.getForecastList().stream().map(forecast->{
+    public ResponseEntity<List<ForecastListDTO>> getAll() {
+        return new ResponseEntity<List<ForecastListDTO>>(forecastService.getForecastList().stream().map(forecast -> {
             var forecastListDTO = new ForecastListDTO();
             forecastListDTO.setId(forecast.getId());
             forecastListDTO.setDate(forecast.getDate());
@@ -37,15 +38,15 @@ public class ForecastController {
 
 
     @GetMapping("/api/forecasts/{id}")
-    public ResponseEntity<Forecast> getById(@PathVariable UUID id){ //Extracts the id we want and passes it on to getByid
+    public ResponseEntity<Forecast> getById(@PathVariable UUID id) { //Extracts the id we want and passes it on to getByid
         Optional<Forecast> forecast = forecastService.getById(id); //Optional better for when only one forecast is returned
-        if(forecast.isPresent()) return ResponseEntity.ok(forecast.get());
-        return  ResponseEntity.notFound().build(); // Same as HTTPStatus.OK, just another way
+        if (forecast.isPresent()) return ResponseEntity.ok(forecast.get());
+        return ResponseEntity.notFound().build(); // Same as HTTPStatus.OK, just another way
     }
 
 
     @PutMapping("/api/forecasts/{id}")
-    public ResponseEntity<Forecast> update(@PathVariable UUID id, @RequestBody NewForecastDTO newForecastDto){ //@Requestbody to convert incoming data to java object
+    public ResponseEntity<Forecast> update(@PathVariable UUID id, @RequestBody NewForecastDTO newForecastDto) { //@Requestbody to convert incoming data to java object
         Forecast forecast = new Forecast();
         forecast.setId(id);
         forecast.setDate(newForecastDto.getDate());
@@ -56,7 +57,7 @@ public class ForecastController {
     }
 
     @PostMapping("/api/forecasts")
-    public ResponseEntity<Forecast> add(@RequestBody ForcastForPostDTO forcastForPostDTO){
+    public ResponseEntity<Forecast> add(@RequestBody ForcastForPostDTO forcastForPostDTO) {
         Forecast forecast = new Forecast();
         forecast.setId(UUID.randomUUID());
         forecast.setTemperature(forcastForPostDTO.getTemperature());
@@ -67,130 +68,123 @@ public class ForecastController {
     }
 
     @DeleteMapping("/api/forecasts/{id}")
-    public ResponseEntity<String> deleteById(@PathVariable UUID id){
+    public ResponseEntity<String> deleteById(@PathVariable UUID id) {
         forecastService.deleteById(id);
         return ResponseEntity.ok("Deleted");
     }
 
 
 
+    // Get temperature
+    @GetMapping("/api/forecasts/date/{date}")
+    public ResponseEntity<List<Forecast>> getByDate(@PathVariable LocalDate date) {
+        List<Forecast> forecast = forecastService.getByDate(date);
 
-
-    // Get average temperature SMHI Api
-   /* @GetMapping("/api/smhi/averageTempSMHI/{date}")
-    public ResponseEntity<Double> getAverageTemperatureSmhiApi() {
-
-        ObjectMapper objectMapper = new ObjectMapper();
-
-        String SMHIUrl="https://opendata-download-metfcst.smhi.se/api/category/pmp3g/version/2/geotype/point/lon/16.158/lat/58.5812/data.json";
-        WeatherSMHI weatherSMHI = null;
-        try {
-            weatherSMHI = objectMapper.readValue(new URL(SMHIUrl), WeatherSMHI.class);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+        if (!forecast.isEmpty()) {
+            return ResponseEntity.ok(forecast);
+        } else {
+            return ResponseEntity.notFound().build();
         }
-
-
-
-        double totalSum = 0;
-        int amountOfNumbers = 0;
-
-
-        for (TimeSeries timeSeries: weatherSMHI.getTimeSeries()) {
-
-            List<Parameter> amount = timeSeries.getParameters();
-
-            for (Parameter parameter : amount) {
-
-                List<Double> temperature = parameter.getValues();
-
-
-                for (Double temp: temperature) {
-                    totalSum += temp;
-                    amountOfNumbers ++;
-                }
-
-            }
-        }
-        double averageTemp = totalSum / amountOfNumbers;
-
-
-
-        return ResponseEntity.ok(averageTemp);
-    }
-
-
-
-    // Get average temperature OpenMeteo Api
-    @GetMapping("/api/OpenMeteo/averageTempOpenMeteo/{date}")
-    public ResponseEntity<Double> getAverageTemperatureOpenMeteoApi() {
-        ObjectMapper objectMapper = new ObjectMapper();
-
-        String openMeteoApiUrl = "https://api.open-meteo.com/v1/forecast?latitude=52.52&longitude=13.41&past_days=1&hourly=temperature_2m,relativehumidity_2m,windspeed_10m";
-        WeatherOpenMeteo weatherOpenMeteo = null;
-        try {
-            weatherOpenMeteo = objectMapper.readValue(new URL(openMeteoApiUrl), WeatherOpenMeteo.class);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
-
-
-        double totalSum = 0;
-
-
-        HourlyOpenMeteo hourlyOpenMeteo2 = weatherOpenMeteo.getHourly();
-
-        List<Double> amount = hourlyOpenMeteo2.getTemperature_2m();
-
-        for (Double allTemps : amount) {
-
-            totalSum += allTemps;
-
-        }
-
-        int	amountOfNumbers = amount.size();
-        double averageTemp = totalSum / amountOfNumbers;
-
-
-        return ResponseEntity.ok(averageTemp);
     }
 
 
 
 
-    // Get average temperature Json list
-    @GetMapping("/api/forecasts/averageTemp/{date}")
-    public ResponseEntity<Double> getAverageTemperature(@PathVariable String date) {
-        List<Forecast> forecastDates = forecastService.getByDate(date);
 
-        double totalSum = 0;
 
-        if (forecastDates.isEmpty()) {
+     //Average temperature from database with input predictions and smhi api together
+    @GetMapping("/api/forecasts/getAverageTemperature/{date}")
+    public ResponseEntity<ArrayList<Map.Entry<LocalDateTime, Double>>> getAverageTemperature(@PathVariable LocalDate date) {
+        List<Forecast> forecast = forecastService.getAverageTemperature(date);
+
+        if (forecast.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
 
+        //  Map to store hourly average temperatures as well as same temperature same hour
+        Map<LocalDateTime, Double> averageHourTemperatures = new HashMap<>();
+        Map<LocalDateTime, Integer> temperatureCountsAHour = new HashMap<>();
 
-        for (Forecast forecast : forecastDates) {
-            totalSum += forecast.getTemperature();
+        for (Forecast forecasts : forecast) {
+            //int hour = forecast.getHour();
+            LocalDateTime hours = LocalDateTime.of(date, LocalTime.of(forecasts.getHour(), 0));
+            double temperature = forecasts.getTemperature();
+
+            // Adding temperatures and counts per hour
+            averageHourTemperatures.merge(hours, temperature, Double::sum);
+            temperatureCountsAHour.merge(hours, 1, Integer::sum);
         }
 
-        double averageTemp = totalSum / forecastDates.size();
+
+        // Calculates the average temperature every hour
+        // totalTemp stores the amount of temperatures there is for a specific hour
+        averageHourTemperatures.forEach((hours, totalTemp) -> {
+            int count = temperatureCountsAHour.get(hours);
+            if (count > 0) {
+                averageHourTemperatures.put(hours, totalTemp / count); // ads the hours(date) and the average temp per hour in the map
+            }
+        });
+
+        // Making my HashMap to a Arraylist so it's able to be sorted
+        ArrayList<Map.Entry <LocalDateTime, Double>> sortedList = new ArrayList<>(averageHourTemperatures.entrySet());
+        sortedList.sort(Map.Entry.comparingByKey());
 
 
-        return ResponseEntity.ok(averageTemp);
+        return ResponseEntity.ok(sortedList);
     }
 
 
-    // Get temperature
-    @GetMapping("/api/forecasts/date/{date}")
-    public ResponseEntity<List<Forecast>> getByDate(@PathVariable String date){
-        List<Forecast> forecast = forecastService.getByDate(date);
 
-        if (!forecast.isEmpty()) {return ResponseEntity.ok(forecast);
-        } else {return ResponseEntity.notFound().build();
+
+    // Make this with Stefan on Monday
+    /*@GetMapping("/api/forecasts/average/{date}")
+    public ResponseEntity<List<ForcastAverageTempDTO>> average(@PathVariable LocalDate date) {
+        List<Forecast> forecast = forecastService.average(date);
+
+        ForcastAverageTempDTO forcastAverageTempDTO;
+
+        List <Float> temperatures = new ArrayList<>();
+        List <Integer> hours = new ArrayList<>();
+
+
+        for (Forecast forecast1 : forecast){
+
+            int hour = forecast1.getHour();
+            LocalDateTime localDateTime = forecast1.getDate();
+            Float temperature = forecast1.getTemperature();
+
+            int sum = 0;
+            for (Float temperature : temperatureList){
+
+                sum += temperatures;
+
+            }
+
+            float averageTemp = sum / temperatures.size();
+
+            if (hour == forcastAverageTempDTO.getHour() && localDateTime.equals(forcastAverageTempDTO.getDate())){
+
+                temperatures ++;
+
+                temperatures.add(hours, temperature / temperatures);
+
+            }
+
+            ForcastAverageTempDTO forcastAverageTempDTO = new ForcastAverageTempDTO();
+            forcastAverageTempDTO.getAverageTemp();
+            forcastAverageTempDTO.getHour();
+
         }
+
+
+        if (forecast.isEmpty()) {
+            return ResponseEntity.notFound().build(); // make the average here
+      }
+        return ResponseEntity.ok(averageTemp);
+
     }*/
+
+
 
 
 }

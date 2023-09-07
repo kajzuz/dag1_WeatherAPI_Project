@@ -6,6 +6,9 @@ import se.systementor.dag1.models.Forecast;
 
 import se.systementor.dag1.repositorys.ForecastRepository;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -17,21 +20,18 @@ public class ForecastService {
     private ForecastRepository forecastRepository;
 
 
-    public ForecastService(){
-
+    public ForecastService() {
 
 
     }
 
 
-
-    public List <Forecast> getForecastList(){
+    public List<Forecast> getForecastList() {
         return forecastRepository.findAll();
         //return forecastList;
     }
 
-    public void add(Forecast forecast)
-    {
+    public void add(Forecast forecast) {
         forecastRepository.save(forecast);
 
 
@@ -41,50 +41,66 @@ public class ForecastService {
         forecastRepository.save(forecast);
     }
 
-    public void delete(Forecast forecast){
+    public void delete(Forecast forecast) {
 
         forecastRepository.deleteById(forecast.getId());
     }
 
-    public void deleteById(UUID id){
+    public void deleteById(UUID id) {
 
         forecastRepository.deleteById(id);
     }
 
 
     //Get by id
-    public Optional<Forecast> getById(UUID id){
+    public Optional<Forecast> getById(UUID id) {
         return forecastRepository.findById(id);
     }
 
 
 
-
-
-
-    // Get average temperature SMHI API, not in use right now
-    /*public List<Forecast> getAverageTemperatureSmhiApi(String date){
-        return getForecastList().stream().filter(forecast -> forecast.getDate().equals(date)).collect(Collectors.toList());
-
-    }
-
     // Get average temperature OpenMeteo API
-    public List<Forecast> getAverageTemperatureOpenMeteoApi(String date){
+    /*public List<Forecast> getAverageTemperatureOpenMeteoApi(String date){
         return getForecastList().stream().filter(forecast -> forecast.getDate().equals(date)).collect(Collectors.toList());
 
-    }
-
-
-    // Get average temperature json list
-   public List<Forecast> getAverageTemperature(String date){
-        return getForecastList().stream().filter(forecast -> forecast.getDate().equals(date)).collect(Collectors.toList());
-
-   }
-
-    // Get by date
-    public List<Forecast> getByDate(String date){
-        return getForecastList().stream().filter(forecast -> forecast.getDate().equals(date)).collect(Collectors.toList());
     }*/
 
+
+
+    // Get by date
+    public List<Forecast> getByDate(LocalDate date) {
+
+        return forecastRepository.findByDate(date.atStartOfDay());
+
+    }
+
+    public List<Forecast> getAverageTemperature(LocalDate date){
+        return getForecastList()
+                .stream()
+                .filter(forecast -> {
+                    LocalDate forecastDate = forecast.getDate().toLocalDate();
+                    return forecastDate.isEqual(date);
+                })
+                .collect(Collectors.toList());
+
+
+        //return forecastRepository.findAverageTemperature(LocalDateTime.from(date));
+    }
+
+
+    // Make this work with Stefan
+    /*public List<Forecast> average(LocalDate date){
+        return getForecastList()
+                .stream()
+                .filter(forecast -> {
+                    LocalDate forecastDate = forecast.getDate().toLocalDate();
+                    return forecastDate.isEqual(date);
+                })
+                .sorted(Comparator.comparing(forecast -> forecast.getHour()))
+                .collect(Collectors.toList());
+
+
+        //return forecastRepository.findAverageTemperature(LocalDateTime.from(date));
+    }*/
 
 }

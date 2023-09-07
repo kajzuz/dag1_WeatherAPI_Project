@@ -66,10 +66,8 @@ public class Dag1Application implements CommandLineRunner { // G: get average on
 				System.out.println("4. Delete prediction");
 				System.out.println("5. SMHI API Data");
 				System.out.println("6. Open Meteo API Data");
-				System.out.println("7. Average temperature (JSON List)");
-				System.out.println("8. Average temperature (API SMHI)");
-				System.out.println("9. Average temperature (Open Meteo API) ");
-				System.out.println("10. Average of (json + smhi) temperatures ");
+				System.out.println("7. Average temperature (API SMHI)");
+				System.out.println("8. Average temperature (Open Meteo API) ");
 				System.out.println("0. Quit\n");
 				System.out.println("Action: ");
 
@@ -102,19 +100,11 @@ public class Dag1Application implements CommandLineRunner { // G: get average on
 						break;
 
 					case 7:
-						average();
-						break;
-
-					case 8:
 						averageSmhiAPI();
 						break;
 
-					case 9:
+					case 8:
 						averageOpenMeteoAPI();
-						break;
-
-					case 10:
-						averageSmhiAndJsonTemperatures();
 						break;
 
 					case 0:
@@ -229,6 +219,7 @@ public class Dag1Application implements CommandLineRunner { // G: get average on
 	}
 
 
+
 	private void SMHIApiData() {
 
 
@@ -272,6 +263,7 @@ public class Dag1Application implements CommandLineRunner { // G: get average on
 			calendar.setTime(validTime);
 
 			int hour = calendar.get(Calendar.HOUR_OF_DAY);
+
 
 
 			LocalDate inputDate = LocalDate.parse(userInput);
@@ -330,14 +322,12 @@ public class Dag1Application implements CommandLineRunner { // G: get average on
 	}
 
 
-
-
-
 	public LocalDate convertToLocalDateViaInstant(Date dateToConvert) {
 		return dateToConvert.toInstant()
 				.atZone(ZoneId.systemDefault())
 				.toLocalDate();
 	}
+
 
 	private void OpenMeteoAPIData() {
 
@@ -419,31 +409,6 @@ public class Dag1Application implements CommandLineRunner { // G: get average on
 	}
 
 
-	public void average() {
-
-
-		double totalSum = 0;
-
-		List<Forecast> amount = forecastService.getForecastList();
-
-		for (var forecast : amount) {
-
-			float temp = forecast.getTemperature();
-
-			totalSum += temp;
-
-		}
-
-		int number = amount.size();
-		double averageTemp = totalSum / number;
-
-		System.out.println("Total sum temperature JSON list : " + totalSum);
-		System.out.println("Amount of temperatures JSON list: " + number);
-
-		System.out.println("Average temp JSON list: " + averageTemp);
-
-	}
-
 
 	private void averageSmhiAPI() {
 
@@ -469,7 +434,6 @@ public class Dag1Application implements CommandLineRunner { // G: get average on
 			for (Parameter parameter : amount) {
 
 				List<Float> temperature = parameter.getValues();
-
 
 
 				for (Float temp : temperature) {
@@ -526,141 +490,10 @@ public class Dag1Application implements CommandLineRunner { // G: get average on
 
 	}
 
-
-	public void averageSmhiAndJsonTemperatures() {
-
-
-		Scanner scanner = new Scanner(System.in);
-
-		ObjectMapper objectMapper = new ObjectMapper();
-
-		String SMHIUrl = "https://opendata-download-metfcst.smhi.se/api/category/pmp3g/version/2/geotype/point/lon/16.158/lat/58.5812/data.json";
-		WeatherSMHI weatherSMHI = null;
-		try {
-			weatherSMHI = objectMapper.readValue(new URL(SMHIUrl), WeatherSMHI.class);
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
-
-
-		//only smhi but add json list as well
-		System.out.println("Enter date (yyyy-MM-dd): ");
-		String inputDate = scanner.next();
-		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-
-		for (TimeSeries timeSeries : weatherSMHI.getTimeSeries()) {
-			Date validTime = timeSeries.getValidTime(); //Date is now the type in Timeseries
-
-
-			String dateFormatted = dateFormat.format(validTime);
-
-			if (dateFormatted.equals(inputDate)) {
-				for (Parameter parameter : timeSeries.getParameters()) {
-					List<Float> temperature = parameter.getValues();
-
-					if (parameter.getName().equals("t") || parameter.getName().equals("pcat")) {
-						double totalTemp = 0;
-						int count = 0;
-
-						for (Float temp : temperature) {
-							totalTemp += temp;
-							count++;
-						}
-
-						if (count > 0) {
-							double averageTemp = totalTemp / count;
-							SimpleDateFormat hourFormat = new SimpleDateFormat("HH");
-							String hour = hourFormat.format(validTime);
-
-							if (averageTemp == 0.0){
-								continue;
-							}
-
-							System.out.println(inputDate + " hour: " + hour + ":00" + ", average temperature: " + averageTemp);
-						}
-					}
-				}
-
-
-
-
-		/*System.out.println("Sum of all temps: " + totalSumOfAllTemperatures);
-		System.out.println("Amount of temps: " + amountOfTemperatures);
-
-		System.out.println("Average (JSON list + SMHI) API temp: " + averageTemp);*/
-
-
-//		ObjectMapper objectMapper = new ObjectMapper();
-//
-//		String SMHIUrl="https://opendata-download-metfcst.smhi.se/api/category/pmp3g/version/2/geotype/point/lon/16.158/lat/58.5812/data.json";
-//		WeatherSMHI weatherSMHI = null;
-//		try {
-//			weatherSMHI = objectMapper.readValue(new URL(SMHIUrl), WeatherSMHI.class);
-//		} catch (IOException e) {
-//			throw new RuntimeException(e);
-//		}
-//
-//
-//		//Json
-//		double totalTempJSONList = 0;
-//
-//		List<Forecast> amountJSONTemp = forecastService.getForecastList();
-//
-//		for (var forecast : amountJSONTemp){
-//
-//			float temp = forecast.getTemperature();
-//
-//			totalTempJSONList += temp;
-//
-//		}
-//
-//		int number = amountJSONTemp.size();
-//		double averageTempJson = totalTempJSONList / number;
-//
-//		//System.out.println("Average temp: " + averageTempJson);//
-//
-//
-//
-//		//SMHI api
-//		double totalTempSmhiApi = 0;
-//		int amountOfNumbers = 0;
-//
-//
-//		for (TimeSeries timeSeries: weatherSMHI.getTimeSeries()) {
-//
-//			List<Parameter> amountTempSmhi = timeSeries.getParameters();
-//
-//
-//			for (Parameter parameter : amountTempSmhi) {
-//
-//				List<Double> temperature = parameter.getValues();
-//
-//
-//				for (Double temp: temperature) {
-//					totalTempSmhiApi += temp;
-//					amountOfNumbers ++;
-//				}
-//
-//			}
-//		}//
-//
-//		// Count the total average temperature
-//		int amountOfTemperatures = number + amountOfNumbers;
-//		double totalSumOfAllTemperatures = totalTempJSONList + totalTempSmhiApi;
-//
-//		double averageTemp = totalSumOfAllTemperatures / amountOfTemperatures;
-//
-//		System.out.println("Sum of all temps: " + totalSumOfAllTemperatures);
-//		System.out.println("Amount of temps: " + amountOfTemperatures);
-//
-//		System.out.println("Average (JSON list + SMHI) API temp: " + averageTemp);
-
-
-			}
-
-		}
 	}
-}
+
+
+
 
 
 
