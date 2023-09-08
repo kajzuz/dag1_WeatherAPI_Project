@@ -4,6 +4,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import se.systementor.dag1.dataSource.DataSource;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -23,7 +24,7 @@ public class Forecast {
 
     private int hour;
 
-    private float temperature;
+    private Float temperature;
 
     private LocalDateTime created;
 
@@ -106,11 +107,11 @@ public class Forecast {
     public void setDate(LocalDateTime date) {
         this.date = date;
     }
-    public float getTemperature() {
+    public Float getTemperature() {
         return temperature;
     }
 
-    public void setTemperature(float temperature) {
+    public void setTemperature(Float temperature) {
         this.temperature = temperature;
     }
 

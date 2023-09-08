@@ -5,19 +5,20 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.format.annotation.DateTimeFormat;
+import se.systementor.dag1.dataSource.DataSource;
 import se.systementor.dag1.models.*;
+import se.systementor.dag1.openMeteo.HourlyOpenMeteo;
+import se.systementor.dag1.openMeteo.HourlyUnitsOpenMeteo;
+import se.systementor.dag1.openMeteo.WeatherOpenMeteo;
 import se.systementor.dag1.repositorys.ForecastRepository;
 import se.systementor.dag1.services.ForecastService;
-
+import smhi.Parameter;
+import smhi.TimeSeries;
+import smhi.WeatherSMHI;
 
 
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URL;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -66,8 +67,8 @@ public class Dag1Application implements CommandLineRunner { // G: get average on
 				System.out.println("4. Delete prediction");
 				System.out.println("5. SMHI API Data");
 				System.out.println("6. Open Meteo API Data");
-				System.out.println("7. Average temperature (API SMHI)");
-				System.out.println("8. Average temperature (Open Meteo API) ");
+				//System.out.println("7. Average temperature (API SMHI)");
+				//System.out.println("8. Average temperature (Open Meteo API) ");
 				System.out.println("0. Quit\n");
 				System.out.println("Action: ");
 
@@ -99,13 +100,13 @@ public class Dag1Application implements CommandLineRunner { // G: get average on
 						OpenMeteoAPIData();
 						break;
 
-					case 7:
+					/*case 7:
 						averageSmhiAPI();
 						break;
 
 					case 8:
 						averageOpenMeteoAPI();
-						break;
+						break;*/
 
 					case 0:
 						System.out.println("Exiting...");
@@ -149,7 +150,7 @@ public class Dag1Application implements CommandLineRunner { // G: get average on
 	}
 
 
-	private void addPrediction(Scanner scanner) {
+	private void addPrediction(Scanner scanner) { // Console is Provider 2
 
 
 		System.out.println("<-- Create Prediction -->");
@@ -172,7 +173,13 @@ public class Dag1Application implements CommandLineRunner { // G: get average on
 		forecast.setHour(hour);
 		forecast.setTemperature(temp);
 
+
+		forecast.setDataSource(DataSource.Console);
+
+
 		forecastService.add(forecast);
+
+
 
 
 	}
@@ -220,7 +227,7 @@ public class Dag1Application implements CommandLineRunner { // G: get average on
 
 
 
-	private void SMHIApiData() {
+	private void SMHIApiData() { // SMHI API is Provider 2
 
 
 		ObjectMapper objectMapper = new ObjectMapper();
@@ -329,7 +336,7 @@ public class Dag1Application implements CommandLineRunner { // G: get average on
 	}
 
 
-	private void OpenMeteoAPIData() {
+	private void OpenMeteoAPIData() { // OPEN Meteo API is Provider 3
 
 		ObjectMapper objectMapper = new ObjectMapper();
 
@@ -375,7 +382,7 @@ public class Dag1Application implements CommandLineRunner { // G: get average on
 		LocalDate inputDate = LocalDate.parse(userInput);
 
 
-		List<Double> temperature = hourlyOpenMeteo.getTemperature_2m();
+		List<Float> temperatureOpenMeteo = hourlyOpenMeteo.getTemperature_2m();
 		List<Integer> relativehumidity_2m = hourlyOpenMeteo.getRelativehumidity_2m();
 		List<Double> windSpeed_10m = hourlyOpenMeteo.getWindspeed_10m();
 		List<String> time = hourlyOpenMeteo.getTime();
@@ -397,10 +404,20 @@ public class Dag1Application implements CommandLineRunner { // G: get average on
 			if (dataFormatted.equals(inputDate)) {
 				System.out.println("----------------------------------------------------");
 				System.out.println("Date: " + dataFormatted + ", hour: " + hour + ":00");
-				System.out.println("Temperature: " + temperature.get(i));
+				System.out.println("Temperature: " + temperatureOpenMeteo.get(i));
 				System.out.println("Relativehumidity_2m: " + relativehumidity_2m.get(i));
 				System.out.println("Windspeed_10m: " + windSpeed_10m.get(i));
 				System.out.println("----------------------------------------------------");
+
+				Forecast forecast = new Forecast();
+
+				forecast.setDate(dataFormatted.atStartOfDay());
+				forecast.setHour(hour);
+				forecast.setTemperature(temperatureOpenMeteo.get(i));
+
+				forecast.setDataSource(DataSource.OpenMeteo);
+
+				forecastRepository.save(forecast);
 
 			}
 		}
@@ -410,7 +427,7 @@ public class Dag1Application implements CommandLineRunner { // G: get average on
 
 
 
-	private void averageSmhiAPI() {
+	/*private void averageSmhiAPI() {
 
 		ObjectMapper objectMapper = new ObjectMapper();
 
@@ -488,7 +505,7 @@ public class Dag1Application implements CommandLineRunner { // G: get average on
 
 		System.out.println("\nAverage Open Meteo API temp: " + averageTemp);
 
-	}
+	}*/
 
 	}
 

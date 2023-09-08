@@ -1,10 +1,10 @@
-package se.systementor.dag1.models;
+package smhi;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import smhi.Geometry;
+import smhi.TimeSeries;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
 public class WeatherSMHI {
 

@@ -1,4 +1,4 @@
-package se.systementor.dag1.models;
+package smhi;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;

@@ -2,13 +2,16 @@ package se.systementor.dag1.controllers;
 
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import se.systementor.dag1.dataSource.DataSource;
 import se.systementor.dag1.dto.ForcastForPostDTO;
 import se.systementor.dag1.dto.ForecastListDTO;
 import se.systementor.dag1.dto.NewForecastDTO;
 import se.systementor.dag1.models.*;
+import se.systementor.dag1.repositorys.ForecastRepository;
 import se.systementor.dag1.services.ForecastService;
 
 import java.time.LocalDate;
@@ -22,6 +25,9 @@ public class ForecastController {
 
     @Autowired
     ForecastService forecastService;
+
+    @Autowired
+    ForecastRepository forecastRepository;
 
 
     @GetMapping("/api/forecasts")
@@ -93,7 +99,7 @@ public class ForecastController {
 
 
      //Average temperature from database with input predictions and smhi api together
-    @GetMapping("/api/forecasts/getAverageTemperature/{date}")
+    @GetMapping("/api/average/{date}")
     public ResponseEntity<ArrayList<Map.Entry<LocalDateTime, Double>>> getAverageTemperature(@PathVariable LocalDate date) {
         List<Forecast> forecast = forecastService.getAverageTemperature(date);
 
@@ -184,6 +190,25 @@ public class ForecastController {
 
     }*/
 
+
+
+
+//    @GetMapping("/api/average/{datasource}/{date}")
+//    public ResponseEntity<List<Object>> dataSourceAverage
+//            (@PathVariable("dataSource") DataSource dataSource,
+//             @PathVariable("date") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate date) {
+//
+//
+//        List<Object> averageSMHI = forecastService.dataSourceAverage(dataSource, date);
+//
+//
+//
+//        if (!averageSMHI.isEmpty()) {
+//            return ResponseEntity.ok(averageSMHI);
+//        } else {
+//            return ResponseEntity.notFound().build();
+//        }
+//    }
 
 
 

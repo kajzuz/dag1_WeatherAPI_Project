@@ -1,4 +1,4 @@
-package se.systementor.dag1.models;
+package se.systementor.dag1.openMeteo;
 
 public class HourlyUnitsOpenMeteo {
 

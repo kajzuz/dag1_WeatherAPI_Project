@@ -2,13 +2,12 @@ package se.systementor.dag1.services;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import se.systementor.dag1.dataSource.DataSource;
 import se.systementor.dag1.models.Forecast;
 
 import se.systementor.dag1.repositorys.ForecastRepository;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -17,7 +16,7 @@ import java.util.stream.Collectors;
 public class ForecastService {
 
     @Autowired
-    private ForecastRepository forecastRepository;
+    ForecastRepository forecastRepository;
 
 
     public ForecastService() {
@@ -102,5 +101,13 @@ public class ForecastService {
 
         //return forecastRepository.findAverageTemperature(LocalDateTime.from(date));
     }*/
+
+
+
+
+//    public List<Object> dataSourceAverage(DataSource dataSource, LocalDate date){
+//
+//        return forecastRepository.findAverageByDataSource(dataSource, date);
+//    }
 
 }

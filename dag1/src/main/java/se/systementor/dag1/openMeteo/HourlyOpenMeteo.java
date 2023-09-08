@@ -1,11 +1,11 @@
-package se.systementor.dag1.models;
+package se.systementor.dag1.openMeteo;
 
 import java.util.ArrayList;
 
 public class HourlyOpenMeteo {
 
     private ArrayList<String> time;
-    private ArrayList<Double> temperature_2m;
+    private ArrayList<Float> temperature_2m;
     private ArrayList<Integer> relativehumidity_2m;
     private ArrayList<Double> windspeed_10m;
 
@@ -17,11 +17,11 @@ public class HourlyOpenMeteo {
         this.time = time;
     }
 
-    public ArrayList<Double> getTemperature_2m() {
+    public ArrayList<Float> getTemperature_2m() {
         return temperature_2m;
     }
 
-    public void setTemperature_2m(ArrayList<Double> temperature_2m) {
+    public void setTemperature_2m(ArrayList<Float> temperature_2m) {
         this.temperature_2m = temperature_2m;
     }
 

@@ -1,4 +1,7 @@
-package se.systementor.dag1.models;
+package se.systementor.dag1.openMeteo;
+
+import se.systementor.dag1.openMeteo.HourlyOpenMeteo;
+import se.systementor.dag1.openMeteo.HourlyUnitsOpenMeteo;
 
 public class WeatherOpenMeteo {
 
