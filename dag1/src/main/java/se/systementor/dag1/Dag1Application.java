@@ -12,9 +12,9 @@ import se.systementor.dag1.openMeteo.HourlyUnitsOpenMeteo;
 import se.systementor.dag1.openMeteo.WeatherOpenMeteo;
 import se.systementor.dag1.repositorys.ForecastRepository;
 import se.systementor.dag1.services.ForecastService;
-import smhi.Parameter;
-import smhi.TimeSeries;
-import smhi.WeatherSMHI;
+import se.systementor.dag1.smhi.Parameter;
+import se.systementor.dag1.smhi.TimeSeries;
+import se.systementor.dag1.smhi.WeatherSMHI;
 
 
 import java.io.IOException;
@@ -227,7 +227,7 @@ public class Dag1Application implements CommandLineRunner { // G: get average on
 
 
 
-	private void SMHIApiData() { // SMHI API is Provider 2
+	private void SMHIApiData() { // SMHI API is Provider 1
 
 
 		ObjectMapper objectMapper = new ObjectMapper();
@@ -387,8 +387,9 @@ public class Dag1Application implements CommandLineRunner { // G: get average on
 		List<Double> windSpeed_10m = hourlyOpenMeteo.getWindspeed_10m();
 		List<String> time = hourlyOpenMeteo.getTime();
 
+		int totalTime = time.size();
 
-		for (int i = 0; i < time.size(); i++) {
+		for (int i = 0; i < totalTime; i++) {
 
 			String originalFormattedTime = time.get(i);
 

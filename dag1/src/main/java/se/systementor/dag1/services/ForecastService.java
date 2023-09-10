@@ -8,6 +8,7 @@ import se.systementor.dag1.models.Forecast;
 import se.systementor.dag1.repositorys.ForecastRepository;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -105,9 +106,9 @@ public class ForecastService {
 
 
 
-//    public List<Object> dataSourceAverage(DataSource dataSource, LocalDate date){
-//
-//        return forecastRepository.findAverageByDataSource(dataSource, date);
-//    }
+    public List<Object> dataSourceAverage(DataSource dataSource, LocalDate date){
+
+        return forecastRepository.findAverageByDataSource(dataSource, date.atStartOfDay());
+    }
 
 }

@@ -26,17 +26,17 @@ public class Forecast {
 
     private Float temperature;
 
-    private LocalDateTime created;
+    private LocalDateTime created; //is this needed?
 
-    private Instant updated;
+    private Instant updated; //is this needed?
 
    // private Instant predictionDate;
 
-    private float longitude;
+    private float longitude; //is this needed?
 
-    private float latitude;
+    private float latitude; //is this needed?
 
-    private boolean rainOrSnow;
+    private boolean rainOrSnow; //is this needed?
 
     /*private int predictionTemperature;
     private int predictionHour;*/

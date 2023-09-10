@@ -1,4 +1,4 @@
-package smhi;
+package se.systementor.dag1.smhi;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 

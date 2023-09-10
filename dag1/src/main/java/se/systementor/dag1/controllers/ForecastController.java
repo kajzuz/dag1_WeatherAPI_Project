@@ -17,6 +17,7 @@ import se.systementor.dag1.services.ForecastService;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -26,8 +27,8 @@ public class ForecastController {
     @Autowired
     ForecastService forecastService;
 
-    @Autowired
-    ForecastRepository forecastRepository;
+//    @Autowired
+//    ForecastRepository forecastRepository;
 
 
     @GetMapping("/api/forecasts")
@@ -193,22 +194,23 @@ public class ForecastController {
 
 
 
-//    @GetMapping("/api/average/{datasource}/{date}")
-//    public ResponseEntity<List<Object>> dataSourceAverage
-//            (@PathVariable("dataSource") DataSource dataSource,
-//             @PathVariable("date") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate date) {
-//
-//
-//        List<Object> averageSMHI = forecastService.dataSourceAverage(dataSource, date);
-//
-//
-//
-//        if (!averageSMHI.isEmpty()) {
-//            return ResponseEntity.ok(averageSMHI);
-//        } else {
-//            return ResponseEntity.notFound().build();
-//        }
-//    }
+    // Filtering by dataSource and date
+    @GetMapping("/api/average/{dataSource}/{date}")
+    public ResponseEntity<List<Object>> dataSourceAverage
+            (@PathVariable("dataSource") DataSource dataSource,
+             @PathVariable("date") LocalDate date) {
+
+
+        List<Object> averageDataSource = forecastService.dataSourceAverage(dataSource, date);
+
+
+
+        if (!averageDataSource.isEmpty()) {
+            return ResponseEntity.ok(averageDataSource);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
 
 
 

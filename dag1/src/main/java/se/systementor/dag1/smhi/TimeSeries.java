@@ -1,7 +1,5 @@
-package smhi;
+package se.systementor.dag1.smhi;
 
-
-import smhi.Parameter;
 
 import java.util.ArrayList;
 import java.util.Date;

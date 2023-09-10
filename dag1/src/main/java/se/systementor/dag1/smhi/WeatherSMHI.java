@@ -1,7 +1,4 @@
-package smhi;
-
-import smhi.Geometry;
-import smhi.TimeSeries;
+package se.systementor.dag1.smhi;
 
 import java.util.ArrayList;
 import java.util.Date;
