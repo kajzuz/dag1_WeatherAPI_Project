@@ -26,20 +26,16 @@ public class Forecast {
 
     private Float temperature;
 
-    private LocalDateTime created; //is this needed?
+    private LocalDateTime created;
 
-    private Instant updated; //is this needed?
+    private LocalDateTime updated;
 
-   // private Instant predictionDate;
+    private float longitude;
 
-    private float longitude; //is this needed?
+    private float latitude;
 
-    private float latitude; //is this needed?
+    private boolean rainOrSnow;
 
-    private boolean rainOrSnow; //is this needed?
-
-    /*private int predictionTemperature;
-    private int predictionHour;*/
 
     private DataSource dataSource;
 
@@ -60,21 +56,14 @@ public class Forecast {
         this.created = created;
     }
 
-    public Instant getUpdated() {
+    public LocalDateTime getUpdated() {
         return updated;
     }
 
-    public void setUpdated(Instant updated) {
+    public void setUpdated(LocalDateTime updated) {
         this.updated = updated;
     }
 
-    /*public Instant getPredictionDate() {
-        return predictionDate;
-    }
-
-    public void setPredictionDate(Instant predictionDate) {
-        this.predictionDate = predictionDate;
-    }*/
 
     public float getLongitude() {
         return longitude;

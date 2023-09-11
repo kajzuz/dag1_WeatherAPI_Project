@@ -10,6 +10,7 @@ import se.systementor.dag1.models.Forecast;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 
@@ -32,17 +33,17 @@ public interface ForecastRepository extends CrudRepository<Forecast, UUID> {
     )
 
     // why is this printed out as a List within a List?
-   List<Object> findAverageByDataSource(
+    List<Object> findAverageByDataSource(
            @Param("dataSource") DataSource dateSource,
            @Param("date") LocalDateTime date);
-
-
 
 
     @Override
     List<Forecast> findAll();
 
     List<Forecast> findByDate(LocalDateTime date);
+
+    List<Forecast> findAllByDate(LocalDateTime date);
 
 
 

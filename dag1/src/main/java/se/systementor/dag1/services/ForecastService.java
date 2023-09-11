@@ -3,6 +3,7 @@ package se.systementor.dag1.services;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import se.systementor.dag1.dataSource.DataSource;
+import se.systementor.dag1.dto.ForcastAverageTempDTO;
 import se.systementor.dag1.models.Forecast;
 
 import se.systementor.dag1.repositorys.ForecastRepository;
@@ -59,13 +60,6 @@ public class ForecastService {
 
 
 
-    // Get average temperature OpenMeteo API
-    /*public List<Forecast> getAverageTemperatureOpenMeteoApi(String date){
-        return getForecastList().stream().filter(forecast -> forecast.getDate().equals(date)).collect(Collectors.toList());
-
-    }*/
-
-
 
     // Get by date
     public List<Forecast> getByDate(LocalDate date) {
@@ -73,6 +67,8 @@ public class ForecastService {
         return forecastRepository.findByDate(date.atStartOfDay());
 
     }
+
+
 
     public List<Forecast> getAverageTemperature(LocalDate date){
         return getForecastList()
@@ -83,30 +79,51 @@ public class ForecastService {
                 })
                 .collect(Collectors.toList());
 
-
-        //return forecastRepository.findAverageTemperature(LocalDateTime.from(date));
     }
 
 
-    // Make this work with Stefan
-    /*public List<Forecast> average(LocalDate date){
-        return getForecastList()
-                .stream()
-                .filter(forecast -> {
-                    LocalDate forecastDate = forecast.getDate().toLocalDate();
-                    return forecastDate.isEqual(date);
-                })
-                .sorted(Comparator.comparing(forecast -> forecast.getHour()))
-                .collect(Collectors.toList());
+    // Get average second one
+    public List<ForcastAverageTempDTO> average(LocalDate date){
+
+       var resultList = new ArrayList<ForcastAverageTempDTO>();
 
 
-        //return forecastRepository.findAverageTemperature(LocalDateTime.from(date));
-    }*/
+       var allPredictionsForDay = forecastRepository.findAllByDate(date.atStartOfDay());
+
+       for (int time = 0; time <= 23; time ++){
+           var forecastAverageTempDTO = new ForcastAverageTempDTO();
+           forecastAverageTempDTO.setHour(time);
+           forecastAverageTempDTO.setDate(date);
+           //float averageForCurrentTime;
+           float amount = 0;
+           float sum = 0;
+
+           for (var forecast : allPredictionsForDay){
+
+               if (forecast.getHour() == time){
+                   amount++;
+                   sum += forecast.getTemperature();
+               }
+
+           }
+           if (amount > 0){
+
+               forecastAverageTempDTO.setAverageTemp(sum / amount);
+
+               resultList.add(forecastAverageTempDTO);
+
+           }
+
+       }
+
+        return resultList;
+    }
 
 
 
 
     public List<Object> dataSourceAverage(DataSource dataSource, LocalDate date){
+
 
         return forecastRepository.findAverageByDataSource(dataSource, date.atStartOfDay());
     }

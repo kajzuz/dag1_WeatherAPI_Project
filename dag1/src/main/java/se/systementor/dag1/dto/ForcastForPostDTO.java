@@ -1,5 +1,7 @@
 package se.systementor.dag1.dto;
 
+import se.systementor.dag1.dataSource.DataSource;
+
 import java.time.LocalDateTime;
 
 public class ForcastForPostDTO {
@@ -9,6 +11,16 @@ public class ForcastForPostDTO {
     private int hour;
 
     private float temperature;
+
+    private DataSource dataSource;
+
+    public DataSource getDataSource() {
+        return dataSource;
+    }
+
+    public void setDataSource(DataSource dataSource) {
+        this.dataSource = dataSource;
+    }
 
     public LocalDateTime getDate() {
         return date;

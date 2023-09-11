@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import se.systementor.dag1.dataSource.DataSource;
+import se.systementor.dag1.dto.ForcastAverageTempDTO;
 import se.systementor.dag1.dto.ForcastForPostDTO;
 import se.systementor.dag1.dto.ForecastListDTO;
 import se.systementor.dag1.dto.NewForecastDTO;
@@ -27,8 +28,6 @@ public class ForecastController {
     @Autowired
     ForecastService forecastService;
 
-//    @Autowired
-//    ForecastRepository forecastRepository;
 
 
     @GetMapping("/api/forecasts")
@@ -54,11 +53,13 @@ public class ForecastController {
 
     @PutMapping("/api/forecasts/{id}")
     public ResponseEntity<Forecast> update(@PathVariable UUID id, @RequestBody NewForecastDTO newForecastDto) { //@Requestbody to convert incoming data to java object
-        Forecast forecast = new Forecast();
+        var forecast = forecastService.getById(id).get();
         forecast.setId(id);
+        forecast.setUpdated(LocalDateTime.now());
         forecast.setDate(newForecastDto.getDate());
         forecast.setTemperature(newForecastDto.getTemperature());
         forecast.setHour(newForecastDto.getHour());
+        forecast.setDataSource(newForecastDto.getDataSource());
         forecastService.update(forecast);
         return ResponseEntity.ok(forecast);
     }
@@ -67,9 +68,11 @@ public class ForecastController {
     public ResponseEntity<Forecast> add(@RequestBody ForcastForPostDTO forcastForPostDTO) {
         Forecast forecast = new Forecast();
         forecast.setId(UUID.randomUUID());
+        forecast.setCreated(LocalDateTime.now());
         forecast.setTemperature(forcastForPostDTO.getTemperature());
         forecast.setHour(forcastForPostDTO.getHour());
         forecast.setDate(forcastForPostDTO.getDate());
+        forecast.setDataSource(forcastForPostDTO.getDataSource());
         forecastService.add(forecast);
         return ResponseEntity.ok(forecast);
     }
@@ -82,7 +85,7 @@ public class ForecastController {
 
 
 
-    // Get temperature
+
     @GetMapping("/api/forecasts/date/{date}")
     public ResponseEntity<List<Forecast>> getByDate(@PathVariable LocalDate date) {
         List<Forecast> forecast = forecastService.getByDate(date);
@@ -143,66 +146,31 @@ public class ForecastController {
 
 
 
-    // Make this with Stefan on Monday
-    /*@GetMapping("/api/forecasts/average/{date}")
+    // Get average second one
+    @GetMapping("/api/forecasts/average/{date}")
     public ResponseEntity<List<ForcastAverageTempDTO>> average(@PathVariable LocalDate date) {
-        List<Forecast> forecast = forecastService.average(date);
 
-        ForcastAverageTempDTO forcastAverageTempDTO;
-
-        List <Float> temperatures = new ArrayList<>();
-        List <Integer> hours = new ArrayList<>();
-
-
-        for (Forecast forecast1 : forecast){
-
-            int hour = forecast1.getHour();
-            LocalDateTime localDateTime = forecast1.getDate();
-            Float temperature = forecast1.getTemperature();
-
-            int sum = 0;
-            for (Float temperature : temperatureList){
-
-                sum += temperatures;
-
-            }
-
-            float averageTemp = sum / temperatures.size();
-
-            if (hour == forcastAverageTempDTO.getHour() && localDateTime.equals(forcastAverageTempDTO.getDate())){
-
-                temperatures ++;
-
-                temperatures.add(hours, temperature / temperatures);
-
-            }
-
-            ForcastAverageTempDTO forcastAverageTempDTO = new ForcastAverageTempDTO();
-            forcastAverageTempDTO.getAverageTemp();
-            forcastAverageTempDTO.getHour();
-
-        }
+        List<ForcastAverageTempDTO> forecast = forecastService.average(date);
 
 
         if (forecast.isEmpty()) {
-            return ResponseEntity.notFound().build(); // make the average here
+            return ResponseEntity.notFound().build();
       }
-        return ResponseEntity.ok(averageTemp);
+        return ResponseEntity.ok(forecast);
 
-    }*/
+    }
 
 
 
 
     // Filtering by dataSource and date
     @GetMapping("/api/average/{dataSource}/{date}")
-    public ResponseEntity<List<Object>> dataSourceAverage
+    public ResponseEntity <List<Object>> dataSourceAverage
             (@PathVariable("dataSource") DataSource dataSource,
              @PathVariable("date") LocalDate date) {
 
 
         List<Object> averageDataSource = forecastService.dataSourceAverage(dataSource, date);
-
 
 
         if (!averageDataSource.isEmpty()) {

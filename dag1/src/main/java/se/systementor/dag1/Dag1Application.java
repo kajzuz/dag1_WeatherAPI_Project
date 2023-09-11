@@ -12,6 +12,7 @@ import se.systementor.dag1.openMeteo.HourlyUnitsOpenMeteo;
 import se.systementor.dag1.openMeteo.WeatherOpenMeteo;
 import se.systementor.dag1.repositorys.ForecastRepository;
 import se.systementor.dag1.services.ForecastService;
+import se.systementor.dag1.smhi.Geometry;
 import se.systementor.dag1.smhi.Parameter;
 import se.systementor.dag1.smhi.TimeSeries;
 import se.systementor.dag1.smhi.WeatherSMHI;
@@ -67,8 +68,6 @@ public class Dag1Application implements CommandLineRunner { // G: get average on
 				System.out.println("4. Delete prediction");
 				System.out.println("5. SMHI API Data");
 				System.out.println("6. Open Meteo API Data");
-				//System.out.println("7. Average temperature (API SMHI)");
-				//System.out.println("8. Average temperature (Open Meteo API) ");
 				System.out.println("0. Quit\n");
 				System.out.println("Action: ");
 
@@ -99,14 +98,6 @@ public class Dag1Application implements CommandLineRunner { // G: get average on
 					case 6:
 						OpenMeteoAPIData();
 						break;
-
-					/*case 7:
-						averageSmhiAPI();
-						break;
-
-					case 8:
-						averageOpenMeteoAPI();
-						break;*/
 
 					case 0:
 						System.out.println("Exiting...");
@@ -172,6 +163,11 @@ public class Dag1Application implements CommandLineRunner { // G: get average on
 		forecast.setDate(dateFormatted.atStartOfDay());
 		forecast.setHour(hour);
 		forecast.setTemperature(temp);
+		forecast.setCreated(LocalDateTime.now());
+
+
+		forecast.setLatitude((float) 59.30996552541549);
+		forecast.setLongitude((float) 18.02151508449004);
 
 
 		forecast.setDataSource(DataSource.Console);
@@ -207,10 +203,11 @@ public class Dag1Application implements CommandLineRunner { // G: get average on
 		System.out.print("Add new temperature: ");
 		int newTemp = scanner.nextInt();
 
-
 		forecast.setTemperature((float) newTemp);
 
 		System.out.println("New temp added!");
+
+		forecast.setUpdated(LocalDateTime.now());
 
 		forecastService.update(forecast); // Database use
 
@@ -255,7 +252,6 @@ public class Dag1Application implements CommandLineRunner { // G: get average on
 		System.out.println("ReferenceTime: " + weatherSMHI.getReferenceTime());
 		System.out.println("Geometry: " + weatherSMHI.getGeometry());
 
-
 		System.out.println("----------------------------------------------------");
 
 
@@ -272,8 +268,8 @@ public class Dag1Application implements CommandLineRunner { // G: get average on
 			int hour = calendar.get(Calendar.HOUR_OF_DAY);
 
 
-
 			LocalDate inputDate = LocalDate.parse(userInput);
+
 
 
 			if (dateFormatted.equals(inputDate)) {
@@ -283,42 +279,56 @@ public class Dag1Application implements CommandLineRunner { // G: get average on
 					List<Float> temperature = parameter.getValues();
 
 
+
+					Geometry geometry = weatherSMHI.getGeometry();
+
+					ArrayList<ArrayList<Float>> geometryCoordinates = geometry.getCoordinates();
+
+
 					for (float temp : temperature) {
 
 						if (!parameter.getUnit().equals("category")) {
 
+							for (ArrayList<Float> coordinates : geometryCoordinates) {
 
-							if (parameter.getName().equals("t")) {
+								Float longitude = coordinates.get(0);
+								Float latitude = coordinates.get(1);
 
-								System.out.println("----------------------------------------------------");
-								System.out.println("Date: " + dateFormatted + ", hour: " + hour + ":00");
-								System.out.println("Name: " + parameter.getName());
-								System.out.println("Level type: " + parameter.getLevelType());
-								System.out.println("Level: " + parameter.getLevel());
-								System.out.println("Unit: " + parameter.getUnit());
-								System.out.println("Values (Temperature): " + temperature); //parameter.getValues() and temperature same
-								System.out.println("----------------------------------------------------");
+								if (parameter.getName().equals("t")) {
 
-								Forecast forecast = new Forecast();
-								forecast.setDate(dateFormatted.atStartOfDay());
-								forecast.setTemperature(temp);
-								forecast.setHour(hour);
+									System.out.println("----------------------------------------------------");
+									System.out.println("Date: " + dateFormatted + ", hour: " + hour + ":00");
+									System.out.println("Name: " + parameter.getName());
+									System.out.println("Level type: " + parameter.getLevelType());
+									System.out.println("Level: " + parameter.getLevel());
+									System.out.println("Unit: " + parameter.getUnit());
+									System.out.println("Values (Temperature): " + temperature); //parameter.getValues() and temperature same
+									System.out.println("----------------------------------------------------");
 
-								forecast.setDataSource(DataSource.Smhi);
-								forecastRepository.save(forecast);
+									Forecast forecast = new Forecast();
+									forecast.setDate(dateFormatted.atStartOfDay());
+									forecast.setTemperature(temp);
+									forecast.setHour(hour);
+									forecast.setLongitude(longitude);
+									forecast.setLatitude(latitude);
+									forecast.setCreated(LocalDateTime.now());
+
+									forecast.setDataSource(DataSource.Smhi);
+									forecastRepository.save(forecast);
 
 
-							} else if (parameter.getName().equals("pcat")) {
+								} else if (parameter.getName().equals("pcat")) {
 
-								System.out.println("----------------------------------------------------");
-								System.out.println("Date: " + dateFormatted);
-								System.out.println("Name: " + parameter.getName());
-								System.out.println("Level type: " + parameter.getLevelType());
-								System.out.println("Level: " + parameter.getLevel());
-								System.out.println("Unit: " + parameter.getUnit());
-								System.out.println("Values (Temperature): " + temperature); //parameter.getValues() and temperature same
-								System.out.println("----------------------------------------------------");
+									System.out.println("----------------------------------------------------");
+									System.out.println("Date: " + dateFormatted);
+									System.out.println("Name: " + parameter.getName());
+									System.out.println("Level type: " + parameter.getLevelType());
+									System.out.println("Level: " + parameter.getLevel());
+									System.out.println("Unit: " + parameter.getUnit());
+									System.out.println("Values (Temperature): " + temperature); //parameter.getValues() and temperature same
+									System.out.println("----------------------------------------------------");
 
+								}
 							}
 
 						}
@@ -329,11 +339,18 @@ public class Dag1Application implements CommandLineRunner { // G: get average on
 	}
 
 
+
+
+
+
 	public LocalDate convertToLocalDateViaInstant(Date dateToConvert) {
 		return dateToConvert.toInstant()
 				.atZone(ZoneId.systemDefault())
 				.toLocalDate();
 	}
+
+
+
 
 
 	private void OpenMeteoAPIData() { // OPEN Meteo API is Provider 3
@@ -389,7 +406,7 @@ public class Dag1Application implements CommandLineRunner { // G: get average on
 
 		int totalTime = time.size();
 
-		for (int i = 0; i < totalTime; i++) {
+		for (int i = 0; i < totalTime; i++) {//make a for each instead
 
 			String originalFormattedTime = time.get(i);
 
@@ -415,6 +432,9 @@ public class Dag1Application implements CommandLineRunner { // G: get average on
 				forecast.setDate(dataFormatted.atStartOfDay());
 				forecast.setHour(hour);
 				forecast.setTemperature(temperatureOpenMeteo.get(i));
+				forecast.setLatitude((float) weatherOpenMeteo.getLatitude());//
+				forecast.setLongitude((float) weatherOpenMeteo.getLongitude());//
+				forecast.setCreated(LocalDateTime.now());
 
 				forecast.setDataSource(DataSource.OpenMeteo);
 
@@ -423,92 +443,9 @@ public class Dag1Application implements CommandLineRunner { // G: get average on
 			}
 		}
 
-
 	}
 
-
-
-	/*private void averageSmhiAPI() {
-
-		ObjectMapper objectMapper = new ObjectMapper();
-
-		String SMHIUrl = "https://opendata-download-metfcst.smhi.se/api/category/pmp3g/version/2/geotype/point/lon/16.158/lat/58.5812/data.json";
-		WeatherSMHI weatherSMHI = null;
-		try {
-			weatherSMHI = objectMapper.readValue(new URL(SMHIUrl), WeatherSMHI.class);
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
-
-
-		double totalSum = 0;
-		int amountOfNumbers = 0;
-
-
-		for (TimeSeries timeSeries : weatherSMHI.getTimeSeries()) {
-
-			List<Parameter> amount = timeSeries.getParameters();
-
-			for (Parameter parameter : amount) {
-
-				List<Float> temperature = parameter.getValues();
-
-
-				for (Float temp : temperature) {
-					totalSum += temp;
-					amountOfNumbers++;
-				}
-
-			}
-		}
-		double averageTemp = totalSum / amountOfNumbers;
-
-		System.out.println("Total sum temperature SMHI Api: " + totalSum);
-		System.out.println("Amount of temperatures SMHI Api: " + amountOfNumbers);
-
-		System.out.println("\nAverage SMHI API temp: " + averageTemp);
-
-	}
-
-
-	private void averageOpenMeteoAPI() {
-
-
-		ObjectMapper objectMapper = new ObjectMapper();
-
-		String openMeteoApiUrl = "https://api.open-meteo.com/v1/forecast?latitude=52.52&longitude=13.41&past_days=1&hourly=temperature_2m,relativehumidity_2m,windspeed_10m";
-		WeatherOpenMeteo weatherOpenMeteo = null;
-		try {
-			weatherOpenMeteo = objectMapper.readValue(new URL(openMeteoApiUrl), WeatherOpenMeteo.class);
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
-
-
-		double totalSum = 0;
-
-
-		HourlyOpenMeteo hourlyOpenMeteo2 = weatherOpenMeteo.getHourly();
-
-		List<Double> amount = hourlyOpenMeteo2.getTemperature_2m();
-
-		for (Double allTemps : amount) {
-
-			totalSum += allTemps;
-
-		}
-
-		int amountOfNumbers = amount.size();
-		double averageTemp = totalSum / amountOfNumbers;
-
-		System.out.println("Total sum temperature Open Meteo Api: " + totalSum);
-		System.out.println("Amount of temperatures in Open Meteo Api: " + amountOfNumbers);
-
-		System.out.println("\nAverage Open Meteo API temp: " + averageTemp);
-
-	}*/
-
-	}
+}
 
 
 
