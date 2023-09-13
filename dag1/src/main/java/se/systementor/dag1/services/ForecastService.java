@@ -9,7 +9,6 @@ import se.systementor.dag1.models.Forecast;
 import se.systementor.dag1.repositorys.ForecastRepository;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -29,7 +28,6 @@ public class ForecastService {
 
     public List<Forecast> getForecastList() {
         return forecastRepository.findAll();
-        //return forecastList;
     }
 
     public void add(Forecast forecast) {
@@ -70,19 +68,19 @@ public class ForecastService {
 
 
 
-    public List<Forecast> getAverageTemperature(LocalDate date){
-        return getForecastList()
-                .stream()
-                .filter(forecast -> {
-                    LocalDate forecastDate = forecast.getDate().toLocalDate();
-                    return forecastDate.isEqual(date);
-                })
-                .collect(Collectors.toList());
+//    public List<Forecast> getAverageTemperature(LocalDate date){
+//        return getForecastList()
+//                .stream()
+//                .filter(forecast -> {
+//                    LocalDate forecastDate = forecast.getDate().toLocalDate();
+//                    return forecastDate.isEqual(date);
+//                })
+//                .collect(Collectors.toList());
+//
+//    }
 
-    }
 
-
-    // Get average second one
+    // Get average temp every hour
     public List<ForcastAverageTempDTO> average(LocalDate date){
 
        var resultList = new ArrayList<ForcastAverageTempDTO>();
@@ -94,7 +92,6 @@ public class ForecastService {
            var forecastAverageTempDTO = new ForcastAverageTempDTO();
            forecastAverageTempDTO.setHour(time);
            forecastAverageTempDTO.setDate(date);
-           //float averageForCurrentTime;
            float amount = 0;
            float sum = 0;
 
@@ -122,10 +119,26 @@ public class ForecastService {
 
 
 
-    public List<Object> dataSourceAverage(DataSource dataSource, LocalDate date){
+    public List<Map<String, Object>> dataSourceAverage(DataSource dataSource, LocalDate date){
+
+        List<Object[]> averageDataSource = forecastRepository.findAverageByDataSource(dataSource, date.atStartOfDay());
+
+        List<Map<String, Object>> arrayWithObjectsList = averageDataSource.stream().map(index -> {
+            Map<String,Object> map = new HashMap<>();
+
+            map.put("id",index[0]);
+            map.put("date",index[1]);
+            map.put("hour",index[2]);
+            map.put("temperature",index[3]);
+            map.put("dataSource",index[4]);
+
+            return map;
+
+        }).collect(Collectors.toList());
 
 
-        return forecastRepository.findAverageByDataSource(dataSource, date.atStartOfDay());
+        return arrayWithObjectsList;
+
     }
 
 }

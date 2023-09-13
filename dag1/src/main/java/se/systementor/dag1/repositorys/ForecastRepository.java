@@ -7,10 +7,8 @@ import org.springframework.stereotype.Repository;
 import se.systementor.dag1.dataSource.DataSource;
 import se.systementor.dag1.models.Forecast;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 
@@ -32,8 +30,8 @@ public interface ForecastRepository extends CrudRepository<Forecast, UUID> {
             "f.hour ASC"
     )
 
-    // why is this printed out as a List within a List?
-    List<Object> findAverageByDataSource(
+
+    List<Object[]> findAverageByDataSource(
            @Param("dataSource") DataSource dateSource,
            @Param("date") LocalDateTime date);
 

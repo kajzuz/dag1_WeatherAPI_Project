@@ -14,6 +14,16 @@ public class ForcastForPostDTO {
 
     private DataSource dataSource;
 
+    private boolean rainOrSnow;
+
+    public boolean getRainOrSnow() {
+        return rainOrSnow;
+    }
+
+    public void setRainOrSnow(boolean rainOrSnow) {
+        this.rainOrSnow = rainOrSnow;
+    }
+
     public DataSource getDataSource() {
         return dataSource;
     }

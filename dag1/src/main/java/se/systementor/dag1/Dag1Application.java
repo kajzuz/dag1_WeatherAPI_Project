@@ -27,7 +27,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 @SpringBootApplication
-public class Dag1Application implements CommandLineRunner { // G: get average on jsonlist and SMHI combined per day
+public class Dag1Application implements CommandLineRunner {
 
 	// Abstraction, we use it without knowing what it does
 
@@ -170,6 +170,14 @@ public class Dag1Application implements CommandLineRunner { // G: get average on
 		forecast.setLongitude((float) 18.02151508449004);
 
 
+
+		if (temp < 10){
+			forecast.setRainOrSnow(true);
+		}else {
+			forecast.setRainOrSnow(false);
+		}
+
+
 		forecast.setDataSource(DataSource.Console);
 
 
@@ -206,6 +214,12 @@ public class Dag1Application implements CommandLineRunner { // G: get average on
 		forecast.setTemperature((float) newTemp);
 
 		System.out.println("New temp added!");
+
+		if (newTemp < 10){
+			forecast.setRainOrSnow(true);
+		}else {
+			forecast.setRainOrSnow(false);
+		}
 
 		forecast.setUpdated(LocalDateTime.now());
 
@@ -305,6 +319,8 @@ public class Dag1Application implements CommandLineRunner { // G: get average on
 									System.out.println("Values (Temperature): " + temperature); //parameter.getValues() and temperature same
 									System.out.println("----------------------------------------------------");
 
+
+
 									Forecast forecast = new Forecast();
 									forecast.setDate(dateFormatted.atStartOfDay());
 									forecast.setTemperature(temp);
@@ -312,6 +328,14 @@ public class Dag1Application implements CommandLineRunner { // G: get average on
 									forecast.setLongitude(longitude);
 									forecast.setLatitude(latitude);
 									forecast.setCreated(LocalDateTime.now());
+
+
+									if (temp < 10){
+										forecast.setRainOrSnow(true);
+									}else {
+										forecast.setRainOrSnow(false);
+									}
+
 
 									forecast.setDataSource(DataSource.Smhi);
 									forecastRepository.save(forecast);
@@ -435,6 +459,14 @@ public class Dag1Application implements CommandLineRunner { // G: get average on
 				forecast.setLatitude((float) weatherOpenMeteo.getLatitude());//
 				forecast.setLongitude((float) weatherOpenMeteo.getLongitude());//
 				forecast.setCreated(LocalDateTime.now());
+
+
+				if (temperatureOpenMeteo.get(i) < 10){
+					forecast.setRainOrSnow(true);
+				}else {
+					forecast.setRainOrSnow(false);
+				}
+
 
 				forecast.setDataSource(DataSource.OpenMeteo);
 

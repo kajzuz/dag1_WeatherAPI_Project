@@ -2,15 +2,11 @@ package se.systementor.dag1.controllers;
 
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import se.systementor.dag1.dataSource.DataSource;
-import se.systementor.dag1.dto.ForcastAverageTempDTO;
-import se.systementor.dag1.dto.ForcastForPostDTO;
-import se.systementor.dag1.dto.ForecastListDTO;
-import se.systementor.dag1.dto.NewForecastDTO;
+import se.systementor.dag1.dto.*;
 import se.systementor.dag1.models.*;
 import se.systementor.dag1.repositorys.ForecastRepository;
 import se.systementor.dag1.services.ForecastService;
@@ -18,7 +14,6 @@ import se.systementor.dag1.services.ForecastService;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -28,6 +23,8 @@ public class ForecastController {
     @Autowired
     ForecastService forecastService;
 
+    @Autowired
+    ForecastRepository forecastRepository;
 
 
     @GetMapping("/api/forecasts")
@@ -60,11 +57,12 @@ public class ForecastController {
         forecast.setTemperature(newForecastDto.getTemperature());
         forecast.setHour(newForecastDto.getHour());
         forecast.setDataSource(newForecastDto.getDataSource());
+        forecast.setRainOrSnow(newForecastDto.getRainOrSnow());
         forecastService.update(forecast);
         return ResponseEntity.ok(forecast);
     }
 
-    @PostMapping("/api/forecasts")
+    @PostMapping("/api/forecasts") // different id in postman vs localhost ask
     public ResponseEntity<Forecast> add(@RequestBody ForcastForPostDTO forcastForPostDTO) {
         Forecast forecast = new Forecast();
         forecast.setId(UUID.randomUUID());
@@ -73,6 +71,7 @@ public class ForecastController {
         forecast.setHour(forcastForPostDTO.getHour());
         forecast.setDate(forcastForPostDTO.getDate());
         forecast.setDataSource(forcastForPostDTO.getDataSource());
+        forecast.setRainOrSnow(forcastForPostDTO.getRainOrSnow());
         forecastService.add(forecast);
         return ResponseEntity.ok(forecast);
     }
@@ -103,50 +102,51 @@ public class ForecastController {
 
 
      //Average temperature from database with input predictions and smhi api together
-    @GetMapping("/api/average/{date}")
-    public ResponseEntity<ArrayList<Map.Entry<LocalDateTime, Double>>> getAverageTemperature(@PathVariable LocalDate date) {
-        List<Forecast> forecast = forecastService.getAverageTemperature(date);
+//    @GetMapping("/api/average/{date}")
+//    public ResponseEntity<ArrayList<Map.Entry<LocalDateTime, Double>>> getAverageTemperature(@PathVariable LocalDate date) {
+//
+//        List<Forecast> forecast = forecastService.getAverageTemperature(date);
+//
+//        if (forecast.isEmpty()) {
+//            return ResponseEntity.notFound().build();
+//        }
+//
+//        //  Map to store hourly average temperatures as well as same temperature same hour
+//        Map<LocalDateTime, Double> averageHourTemperatures = new HashMap<>();
+//        Map<LocalDateTime, Integer> temperatureCountsAHour = new HashMap<>();
+//
+//        for (Forecast forecasts : forecast) {
+//            //int hour = forecast.getHour();
+//            LocalDateTime hours = LocalDateTime.of(date, LocalTime.of(forecasts.getHour(), 0));
+//            double temperature = forecasts.getTemperature();
+//
+//            // Adding temperatures and counts per hour
+//            averageHourTemperatures.merge(hours, temperature, Double::sum);
+//            temperatureCountsAHour.merge(hours, 1, Integer::sum);
+//        }
+//
+//
+//        // Calculates the average temperature every hour
+//        // totalTemp stores the amount of temperatures there is for a specific hour
+//        averageHourTemperatures.forEach((hours, totalTemp) -> {
+//            int count = temperatureCountsAHour.get(hours);
+//            if (count > 0) {
+//                averageHourTemperatures.put(hours, totalTemp / count); // ads the hours(date) and the average temp per hour in the map
+//            }
+//        });
+//
+//        // Making my HashMap to a Arraylist so it's able to be sorted
+//        ArrayList<Map.Entry <LocalDateTime, Double>> sortedList = new ArrayList<>(averageHourTemperatures.entrySet());
+//        sortedList.sort(Map.Entry.comparingByKey());
+//
+//
+//        return ResponseEntity.ok(sortedList);
+//    }
 
-        if (forecast.isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
-
-        //  Map to store hourly average temperatures as well as same temperature same hour
-        Map<LocalDateTime, Double> averageHourTemperatures = new HashMap<>();
-        Map<LocalDateTime, Integer> temperatureCountsAHour = new HashMap<>();
-
-        for (Forecast forecasts : forecast) {
-            //int hour = forecast.getHour();
-            LocalDateTime hours = LocalDateTime.of(date, LocalTime.of(forecasts.getHour(), 0));
-            double temperature = forecasts.getTemperature();
-
-            // Adding temperatures and counts per hour
-            averageHourTemperatures.merge(hours, temperature, Double::sum);
-            temperatureCountsAHour.merge(hours, 1, Integer::sum);
-        }
-
-
-        // Calculates the average temperature every hour
-        // totalTemp stores the amount of temperatures there is for a specific hour
-        averageHourTemperatures.forEach((hours, totalTemp) -> {
-            int count = temperatureCountsAHour.get(hours);
-            if (count > 0) {
-                averageHourTemperatures.put(hours, totalTemp / count); // ads the hours(date) and the average temp per hour in the map
-            }
-        });
-
-        // Making my HashMap to a Arraylist so it's able to be sorted
-        ArrayList<Map.Entry <LocalDateTime, Double>> sortedList = new ArrayList<>(averageHourTemperatures.entrySet());
-        sortedList.sort(Map.Entry.comparingByKey());
-
-
-        return ResponseEntity.ok(sortedList);
-    }
 
 
 
-
-    // Get average second one
+    // Get average temp every hour
     @GetMapping("/api/forecasts/average/{date}")
     public ResponseEntity<List<ForcastAverageTempDTO>> average(@PathVariable LocalDate date) {
 
@@ -165,12 +165,13 @@ public class ForecastController {
 
     // Filtering by dataSource and date
     @GetMapping("/api/average/{dataSource}/{date}")
-    public ResponseEntity <List<Object>> dataSourceAverage
+    public ResponseEntity <List<Map<String, Object>>> dataSourceAverage
             (@PathVariable("dataSource") DataSource dataSource,
              @PathVariable("date") LocalDate date) {
 
 
-        List<Object> averageDataSource = forecastService.dataSourceAverage(dataSource, date);
+        List<Map<String, Object>> averageDataSource = forecastService.dataSourceAverage(dataSource, date);
+
 
 
         if (!averageDataSource.isEmpty()) {
