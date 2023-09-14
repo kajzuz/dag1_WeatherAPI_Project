@@ -4,7 +4,7 @@ import se.systementor.dag1.dataSource.DataSource;
 
 import java.time.LocalDateTime;
 
-public class NewForecastDTO { //Limit data for db, it's ok to have them as public but we prefer private. Min and maxValue add
+public class NewForecastDTO {
 
     private LocalDateTime date;
 

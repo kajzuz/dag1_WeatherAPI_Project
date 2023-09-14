@@ -20,40 +20,44 @@ public class ForecastService {
     ForecastRepository forecastRepository;
 
 
-    public ForecastService() {
-
-
-    }
 
 
     public List<Forecast> getForecastList() {
+
         return forecastRepository.findAll();
+
     }
 
     public void add(Forecast forecast) {
-        forecastRepository.save(forecast);
 
+        forecastRepository.save(forecast);
 
     }
 
     public void update(Forecast forecast) { // Middle hand for database
+
         forecastRepository.save(forecast);
+
     }
 
     public void delete(Forecast forecast) {
 
         forecastRepository.deleteById(forecast.getId());
+
     }
 
     public void deleteById(UUID id) {
 
         forecastRepository.deleteById(id);
+
     }
 
 
     //Get by id
     public Optional<Forecast> getById(UUID id) {
+
         return forecastRepository.findById(id);
+
     }
 
 
@@ -68,16 +72,6 @@ public class ForecastService {
 
 
 
-//    public List<Forecast> getAverageTemperature(LocalDate date){
-//        return getForecastList()
-//                .stream()
-//                .filter(forecast -> {
-//                    LocalDate forecastDate = forecast.getDate().toLocalDate();
-//                    return forecastDate.isEqual(date);
-//                })
-//                .collect(Collectors.toList());
-//
-//    }
 
 
     // Get average temp every hour
@@ -126,11 +120,11 @@ public class ForecastService {
         List<Map<String, Object>> arrayWithObjectsList = averageDataSource.stream().map(index -> {
             Map<String,Object> map = new HashMap<>();
 
-            map.put("id",index[0]);
-            map.put("date",index[1]);
-            map.put("hour",index[2]);
-            map.put("temperature",index[3]);
-            map.put("dataSource",index[4]);
+
+            map.put("date",index[0]);
+            map.put("hour",index[1]);
+            map.put("temperature",index[2]);
+            map.put("dataSource",index[3]);
 
             return map;
 

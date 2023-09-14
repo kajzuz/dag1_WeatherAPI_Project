@@ -16,7 +16,7 @@ import java.util.UUID;
 public interface ForecastRepository extends CrudRepository<Forecast, UUID> {
 
 
-    @Query("SELECT f.id, f.date, f.hour, AVG(f.temperature), f.dataSource " +
+    @Query("SELECT f.date, f.hour, AVG(f.temperature), f.dataSource " +
             "FROM Forecast f " +
             "WHERE f.dataSource = :dataSource " +
             "AND f.date = :date " +

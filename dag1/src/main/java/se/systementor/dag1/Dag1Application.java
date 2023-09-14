@@ -29,7 +29,6 @@ import java.util.*;
 @SpringBootApplication
 public class Dag1Application implements CommandLineRunner {
 
-	// Abstraction, we use it without knowing what it does
 
 	@Autowired // "newar" for us when compiled
 	private ForecastService forecastService;
@@ -74,39 +73,18 @@ public class Dag1Application implements CommandLineRunner {
 				int menuOption = scanner.nextInt();
 
 
-				switch (menuOption) { //Make this switch "enhanced" when done
-					case 1:
-						listPredictions();
-						break;
-
-					case 2:
-						addPrediction(scanner);
-						break;
-
-					case 3:
-						updatePrediction(scanner);
-						break;
-
-					case 4:
-						deletePrediction(scanner);
-						break;
-
-					case 5:
-						SMHIApiData();
-						break;
-
-					case 6:
-						OpenMeteoAPIData();
-						break;
-
-					case 0:
+				switch (menuOption) {
+					case 1 -> listPredictions();
+					case 2 -> addPrediction(scanner);
+					case 3 -> updatePrediction(scanner);
+					case 4 -> deletePrediction(scanner);
+					case 5 -> SMHIApiData();
+					case 6 -> OpenMeteoAPIData();
+					case 0 -> {
 						System.out.println("Exiting...");
 						trueOrFalse = false;
-						break;
-
-					default:
-						System.out.println("Please, only enter valid options!\nTry again!");
-
+					}
+					default -> System.out.println("Please, only enter valid options!\nTry again!");
 				}
 
 
@@ -183,9 +161,6 @@ public class Dag1Application implements CommandLineRunner {
 
 		forecastService.add(forecast);
 
-
-
-
 	}
 
 
@@ -232,7 +207,7 @@ public class Dag1Application implements CommandLineRunner {
 
 		System.out.println("Select one of the following row numbers you want to DELETE: \n ");
 		var deleteRow = scanner.nextInt();
-		var forecast = forecastService.getForecastList().get(deleteRow - 1);
+		var forecast = forecastService.getForecastList().get(deleteRow - 1); //index starts at 0, that is the use of -1
 		forecastService.delete(forecast);
 	}
 
@@ -269,10 +244,11 @@ public class Dag1Application implements CommandLineRunner {
 		System.out.println("----------------------------------------------------");
 
 
-		for (TimeSeries timeSeries : weatherSMHI.getTimeSeries()) { // Limit results to a day
-			//String validTime = String.valueOf(timeSeries.getValidTime());
+		for (TimeSeries timeSeries : weatherSMHI.getTimeSeries()) {
+
 
 			LocalDate dateFormatted = convertToLocalDateViaInstant(timeSeries.getValidTime());
+
 
 
 			Date validTime = timeSeries.getValidTime();
@@ -297,6 +273,7 @@ public class Dag1Application implements CommandLineRunner {
 					Geometry geometry = weatherSMHI.getGeometry();
 
 					ArrayList<ArrayList<Float>> geometryCoordinates = geometry.getCoordinates();
+
 
 
 					for (float temp : temperature) {
@@ -430,13 +407,10 @@ public class Dag1Application implements CommandLineRunner {
 
 		int totalTime = time.size();
 
-		for (int i = 0; i < totalTime; i++) {//make a for each instead
+		for (int i = 0; i < totalTime; i++) {
 
 			String originalFormattedTime = time.get(i);
 
-			/*LocalDate localDate = LocalDate.parse(originalFormattedTime, DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm"));
-
-			String dataFormatted = localDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));*/
 
 			LocalDateTime dateTime = LocalDateTime.parse(originalFormattedTime, DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm"));
 
@@ -456,8 +430,8 @@ public class Dag1Application implements CommandLineRunner {
 				forecast.setDate(dataFormatted.atStartOfDay());
 				forecast.setHour(hour);
 				forecast.setTemperature(temperatureOpenMeteo.get(i));
-				forecast.setLatitude((float) weatherOpenMeteo.getLatitude());//
-				forecast.setLongitude((float) weatherOpenMeteo.getLongitude());//
+				forecast.setLatitude((float) weatherOpenMeteo.getLatitude());
+				forecast.setLongitude((float) weatherOpenMeteo.getLongitude());
 				forecast.setCreated(LocalDateTime.now());
 
 
