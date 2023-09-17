@@ -116,7 +116,7 @@ public class ForecastController {
 
 
     // Filtering by dataSource and date
-    @GetMapping("/api/average/{dataSource}/{date}")
+    @GetMapping("/api/forecasts/average/{dataSource}/{date}")
     public ResponseEntity <List<Map<String, Object>>> dataSourceAverage
             (@PathVariable("dataSource") DataSource dataSource,
              @PathVariable("date") LocalDate date) {
